@@ -1,0 +1,15 @@
+name: "Setup build environment"
+description: "Setup python, ninja-build etc."
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install prerequisites (Linux)
+      run: sudo apt-get install --yes ninja-build
+      shell: bash
