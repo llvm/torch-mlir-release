@@ -18,9 +18,7 @@ jobs:
   build_linux:
     name: Linux x86_64 Build
     runs-on: ubuntu-latest
-    # Elevates permissions for this repo's `GITHUB_TOKEN` to allow this action to make a release
-    # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+    # Elevates permissions for `GITHUB_TOKEN`'s content scope (to allow this action to make a release)
     permissions:
       contents: write
     # Don't run this in everyone's forks.

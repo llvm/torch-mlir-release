@@ -1,6 +1,10 @@
 name: "Setup build environment"
 description: "Setup python, ninja-build etc."
 
+# Make top-level permissions on GITHUB_TOKEN more restrictive
+permissions:
+  contents: read
+
 runs:
   using: "composite"
 
