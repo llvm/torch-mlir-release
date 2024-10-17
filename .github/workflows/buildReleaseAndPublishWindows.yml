@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write
     # Don't run this in everyone's forks.
-    if: github.repository == 'llvm/torch-mlir-release'
+    if: github.repository == 'sahas3/torch-mlir-release'
     strategy:
       matrix:
         package: [torch-mlir]
