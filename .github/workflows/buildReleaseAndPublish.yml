@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: write
     # Don't run this in everyone's forks.
-    if: github.repository == 'llvm/torch-mlir-release'
+    if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
     strategy:
       matrix:
         package: [torch-mlir]
