@@ -24,8 +24,8 @@ jobs:
     # Elevates permissions for `GITHUB_TOKEN`'s content scope (to allow this action to make a release)
     permissions:
       contents: write
-    # Don't run this in everyone's forks.
-    if: github.repository == 'llvm/torch-mlir-release'
+    # Don't run this in everyone's forks on schedule but allow to run via dispatch.
+    if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
     strategy:
       matrix:
         package: [torch-mlir]
