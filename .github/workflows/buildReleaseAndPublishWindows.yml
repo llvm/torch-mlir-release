@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         package: [torch-mlir]
-        py_version: [cp310-cp310, cp311-cp311]
+        py_version: [cp310-cp310, cp311-cp311, cp312-312]
 
     steps:
       - name: Checkout torch-mlir
