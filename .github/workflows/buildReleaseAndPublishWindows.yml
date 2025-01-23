@@ -29,7 +29,9 @@ jobs:
     strategy:
       matrix:
         package: [torch-mlir]
-        py_version: [cp310-cp310, cp311-cp311, cp312-312]
+        # TODO(#10): `py_version` has no effect and wheels only get build for 3.11.
+        # py_version: [cp310-cp310, cp311-cp311, cp312-cp312]
+        py_version: [cp311-cp311]
 
     steps:
       - name: Checkout torch-mlir
