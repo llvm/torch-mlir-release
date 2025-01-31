@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: llvm/torch-mlir
-          ref: refs/heads/main
+          ref: af8514c92cf1ce34d450c299a644fd4369590eec
           submodules: 'true'
 
       - name: Setup workspace
@@ -58,16 +58,3 @@ jobs:
           if-no-files-found: error
           name: snapshot-${{ matrix.package }}-${{ matrix.py_version }}-${{ env.tm_package_version }}
           path: dist
-
-      - name: Release python wheels
-        uses: ncipollo/release-action@cdcc88a9acf3ca41c16c37bb7d21b9ad48560d87 # v.1.15.0
-        with:
-          artifacts: dist/*.whl
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "dev-wheels"
-          name: "dev-wheels"
-          body: "Automatic snapshot release of torch-mlir python wheels."
-          removeArtifacts: false
-          allowUpdates: true
-          replacesArtifacts: true
-          makeLatest: true
