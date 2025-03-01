@@ -62,14 +62,14 @@ jobs:
           delvewheel repair --add-path ./build/tools/torch-mlir/python_packages/torch_mlir/torch_mlir/_mlir_libs --add-dll TorchMLIRAggregateCAPI.dll --no-dll 'c10.dll;torch_python.dll;torch_cpu.dll' -v dist/torch_mlir*.whl -w dist
 
       - name: Upload python wheels
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           if-no-files-found: error
           name: snapshot-${{ matrix.package }}-${{ matrix.py_version }}-${{ env.tm_package_version }}
           path: dist
 
       - name: Release python wheels
-        uses: ncipollo/release-action@cdcc88a9acf3ca41c16c37bb7d21b9ad48560d87 # v1.15.0
+        uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174 # v1.16.0
         with:
           artifacts: dist/*.whl
           token: "${{ secrets.GITHUB_TOKEN }}"
