@@ -32,8 +32,8 @@ jobs:
       - name: Checkout torch-mlir
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          repository: sahas3/torch-mlir
-          ref: refs/heads/fix_linux_release_ci
+          repository: llvm/torch-mlir
+          ref: refs/heads/main
           submodules: 'true'
 
       - name: Setup workspace
