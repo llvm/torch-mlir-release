@@ -1,0 +1,51 @@
+name: Delete Old Releases
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # Daily at 10:00 UTC which is 2:00 AM PST (UTC-8)
+  workflow_dispatch:      # Manual trigger
+  push: 
+
+jobs:
+  clean_releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old releases
+        # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Don't run this in everyone's forks on schedule but allow to run via dispatch.
+        if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
+        run: |
+
+          # Define 60 days in seconds (60 * 24 * 60 * 60 = 5184000)
+          SECONDS_60_DAYS=5184000
+
+          # Store the list of asset ID and Name pairs in the variable
+          # "ASSET_ID ASSET_NAME" on each line
+          ASSETS_TO_DELETE=$(gh api --paginate repos/${{ github.repository }}/releases | \
+            jq -r --argjson cutoff_seconds "$SECONDS_60_DAYS" '
+                # Calculate the 60-day cutoff as now minus 60 days
+                . as $releases | (now - $cutoff_seconds) as $cutoff | 
+                
+                # Iterate through every single asset in every release
+                $releases[].assets[] | 
+                
+                # Convert the asset date string to a numeric timestamp
+                (.created_at | fromdateiso8601) as $asset_time |
+                
+                # Select assets where the asset_time is older than the cutoff
+                select($asset_time < $cutoff) |
+                
+                # Output the asset ID and Name, separated by a space
+                "\(.id) \(.name)"
+            ')
+
+          # Process each asset using a loop to read two space-separated fields from the ASSETS_TO_DELETE variable.
+          while IFS=' ' read -r ID NAME; do
+            # Check if both ID and NAME were successfully read
+            if [ -n "$ID" ]; then
+              echo "Deleting old asset: ID $ID (Name: $NAME)"
+              gh api --method DELETE repos/${{ github.repository }}/releases/assets/$ID
+            fi
+          done <<< "$ASSETS_TO_DELETE"
