@@ -3,14 +3,13 @@ name: Delete Old Releases
 on:
   schedule:
     - cron: '0 10 * * *'  # Daily at 10:00 UTC which is 2:00 AM PST (UTC-8)
-  workflow_dispatch:      # Manual trigger
-  push: 
+  workflow_dispatch:
 
 jobs:
-  clean_releases:
+  delete_release_assets:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete old releases
+      - name: Delete old release assets
         # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -19,12 +18,12 @@ jobs:
         run: |
 
           # Define 60 days in seconds (60 * 24 * 60 * 60 = 5184000)
-          SECONDS_60_DAYS=5184000
+          60_DAYS_IN_SECONDS=5184000
 
           # Store the list of asset ID and Name pairs in the variable
           # "ASSET_ID ASSET_NAME" on each line
           ASSETS_TO_DELETE=$(gh api --paginate repos/${{ github.repository }}/releases | \
-            jq -r --argjson cutoff_seconds "$SECONDS_60_DAYS" '
+            jq -r --argjson cutoff_seconds "$60_DAYS_IN_SECONDS" '
                 # Calculate the 60-day cutoff as now minus 60 days
                 . as $releases | (now - $cutoff_seconds) as $cutoff | 
                 
