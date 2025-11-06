@@ -1,4 +1,4 @@
-name: Build Release and Publish (X86)
+name: Build Release and Publish (Arm)
 
 on:
   workflow_dispatch:
@@ -16,8 +16,8 @@ concurrency:
 
 jobs:
   build_linux:
-    name: Linux x86_64 Build
-    runs-on: ubuntu-24.04
+    name: Linux Arm Build
+    runs-on: ubuntu-24.04-arm
     # Elevates permissions for `GITHUB_TOKEN`'s content scope (to allow this action to make a release)
     permissions:
       contents: write
