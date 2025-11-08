@@ -1,4 +1,4 @@
-name: Build Release and Publish (X86)
+name: Build Release and Publish (x86_64 + AArch64)
 
 on:
   workflow_dispatch:
@@ -16,8 +16,7 @@ concurrency:
 
 jobs:
   build_linux:
-    name: Linux x86_64 Build
-    runs-on: ubuntu-24.04
+    name: Linux Build
     # Elevates permissions for `GITHUB_TOKEN`'s content scope (to allow this action to make a release)
     permissions:
       contents: write
@@ -27,6 +26,9 @@ jobs:
       matrix:
         package: [torch-mlir]
         py_version: [cp310-cp310, cp311-cp311, cp312-cp312]
+        arch: [x64_64, AArch64]
+
+    runs-on: ${{ matrix.arch == 'AArch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     steps:
       - name: Checkout torch-mlir
