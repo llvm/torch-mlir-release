@@ -43,7 +43,7 @@ jobs:
           # Process each asset using a loop to read two space-separated fields from the ASSETS_TO_DELETE variable.
           while IFS=' ' read -r ID NAME; do
             # Check if both ID and NAME were successfully read
-            if [ -n "$ID" ]; then
+            if [ -n "$ID" ] && [ -n "$NAME" ]; then
               echo "Deleting old asset: ID $ID (Name: $NAME)"
               gh api --method DELETE repos/${{ github.repository }}/releases/assets/$ID
             fi
