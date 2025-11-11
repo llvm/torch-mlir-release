@@ -7,7 +7,10 @@ on:
 
 jobs:
   delete_release_assets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: reads
+      packages: write
     steps:
       - name: Delete old release assets
         # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
@@ -20,31 +23,13 @@ jobs:
           # Define 60 days in seconds (60 * 24 * 60 * 60 = 5184000)
           60_DAYS_IN_SECONDS=5184000
 
-          # Store the list of asset ID and Name pairs in the variable
-          # "ASSET_ID ASSET_NAME" on each line
-          ASSETS_TO_DELETE=$(gh api --paginate repos/${{ github.repository }}/releases | \
+          # Find assets older than 60 days in the 'dev-wheels' release and pipe their names to xargs for deletion.
+          gh release view dev-wheels --json assets | \
             jq -r --argjson cutoff_seconds "$60_DAYS_IN_SECONDS" '
-                # Calculate the 60-day cutoff as now minus 60 days
-                . as $releases | (now - $cutoff_seconds) as $cutoff | 
-                
-                # Iterate through every single asset in every release
-                $releases[].assets[] | 
-                
-                # Convert the asset date string to a numeric timestamp
-                (.created_at | fromdateiso8601) as $asset_time |
-                
-                # Select assets where the asset_time is older than the cutoff
-                select($asset_time < $cutoff) |
-                
-                # Output the asset ID and Name, separated by a space
-                "\(.id) \(.name)"
-            ')
-
-          # Process each asset using a loop to read two space-separated fields from the ASSETS_TO_DELETE variable.
-          while IFS=' ' read -r ID NAME; do
-            # Check if both ID and NAME were successfully read
-            if [ -n "$ID" ] && [ -n "$NAME" ]; then
-              echo "Deleting old asset: ID $ID (Name: $NAME)"
-              gh api --method DELETE repos/${{ github.repository }}/releases/assets/$ID
-            fi
-          done <<< "$ASSETS_TO_DELETE"
+              (now - $cutoff_seconds) as $cutoff |
+              # Iterate over the assets in the single release
+              .assets[] |
+              # Select assets older than the cutoff
+              select((.createdAt | fromdateiso8601) < $cutoff) |
+              .name
+            ' | xargs -L1 gh release delete-asset dev-wheels
