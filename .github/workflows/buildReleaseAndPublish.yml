@@ -1,4 +1,4 @@
-name: Build Release and Publish (x86_64 + AArch64)
+name: Build Release and Publish
 
 on:
   workflow_dispatch:
