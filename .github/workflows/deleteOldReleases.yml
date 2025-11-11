@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: '0 10 * * *'  # Daily at 10:00 UTC which is 2:00 AM PST (UTC-8)
   workflow_dispatch:
-  push:
 
 jobs:
   delete_release_assets:
