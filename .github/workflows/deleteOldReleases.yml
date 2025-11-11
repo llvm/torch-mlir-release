@@ -14,9 +14,9 @@ jobs:
       packages: write
     steps:
       - name: Delete old release assets
-        # # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Don't run this in everyone's forks on schedule but allow to run via dispatch.
         if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
         run: |
