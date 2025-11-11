@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 10 * * *'  # Daily at 10:00 UTC which is 2:00 AM PST (UTC-8)
   workflow_dispatch:
+  push:
 
 jobs:
   delete_release_assets:
@@ -21,15 +22,15 @@ jobs:
         run: |
 
           # Define 60 days in seconds (60 * 24 * 60 * 60 = 5184000)
-          60_DAYS_IN_SECONDS=5184000
+          CUTOFF_SECONDS=5184000
 
           # Find assets older than 60 days in the 'dev-wheels' release and pipe their names to xargs for deletion.
           gh release view dev-wheels --json assets | \
-            jq -r --argjson cutoff_seconds "$60_DAYS_IN_SECONDS" '
+            jq -r --argjson cutoff_seconds "$CUTOFF_SECONDS" '
               (now - $cutoff_seconds) as $cutoff |
               # Iterate over the assets in the single release
               .assets[] |
               # Select assets older than the cutoff
               select((.createdAt | fromdateiso8601) < $cutoff) |
               .name
-            ' | xargs -L1 gh release delete-asset dev-wheels
+            ' | xargs -r gh release delete-asset dev-wheels
