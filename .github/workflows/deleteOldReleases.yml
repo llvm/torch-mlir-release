@@ -21,11 +21,11 @@ jobs:
         if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
         run: |
 
-          # Define 60 days in seconds (60 * 24 * 60 * 60 = 5184000)
+          # Define cutoff in seconds with 60 days as the threshold (60 * 24 * 60 * 60 = 5184000)
           CUTOFF_SECONDS=5184000
 
           # Find assets older than 60 days in the 'dev-wheels' release and pipe their names to xargs for deletion.
-          gh release view dev-wheels --json assets | \
+          gh release view dev-wheels --repo ${{ github.repository }} --json assets | \
             jq -r --argjson cutoff_seconds "$CUTOFF_SECONDS" '
               (now - $cutoff_seconds) as $cutoff |
               # Iterate over the assets in the single release
