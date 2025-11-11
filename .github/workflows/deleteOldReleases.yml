@@ -9,7 +9,7 @@ jobs:
   delete_release_assets:
     runs-on: ubuntu-24.04
     permissions:
-      contents: reads
+      contents: read
       packages: write
     steps:
       - name: Delete old release assets
