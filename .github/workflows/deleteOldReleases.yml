@@ -1,0 +1,35 @@
+name: Delete Old Releases
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # Daily at 10:00 UTC which is 2:00 AM PST (UTC-8)
+  workflow_dispatch:
+
+jobs:
+  delete_release_assets:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Delete old release assets
+        # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Don't run this in everyone's forks on schedule but allow to run via dispatch.
+        if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
+        run: |
+
+          # Define cutoff in seconds with 60 days as the threshold (60 * 24 * 60 * 60 = 5184000)
+          CUTOFF_SECONDS=5184000
+
+          # Find assets older than 60 days in the 'dev-wheels' release and pipe their names to xargs for deletion.
+          gh release view dev-wheels --repo ${{ github.repository }} --json assets | \
+            jq -r --argjson cutoff_seconds "$CUTOFF_SECONDS" '
+              (now - $cutoff_seconds) as $cutoff |
+              # Iterate over the assets in the single release
+              .assets[] |
+              # Select assets older than the cutoff
+              select((.createdAt | fromdateiso8601) < $cutoff) |
+              .name
+            ' | xargs -r gh release delete-asset dev-wheels

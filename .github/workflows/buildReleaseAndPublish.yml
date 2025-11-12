@@ -73,3 +73,4 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           makeLatest: true
+          artifactErrorsFailBuild: true
