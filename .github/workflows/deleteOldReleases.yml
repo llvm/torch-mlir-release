@@ -9,8 +9,7 @@ jobs:
   delete_release_assets:
     runs-on: ubuntu-24.04
     permissions:
-      contents: read
-      packages: write
+      contents: write 
     steps:
       - name: Delete old release assets
         # To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable
@@ -32,4 +31,4 @@ jobs:
               # Select assets older than the cutoff
               select((.createdAt | fromdateiso8601) < $cutoff) |
               .name
-            ' | xargs -r gh release delete-asset dev-wheels
+            ' | xargs -r -I {} gh release delete-asset dev-wheels {} --repo ${{ github.repository }}
