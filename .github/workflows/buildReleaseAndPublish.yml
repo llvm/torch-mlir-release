@@ -26,7 +26,7 @@ jobs:
       matrix:
         package: [torch-mlir]
         py_version: [cp310-cp310, cp311-cp311, cp312-cp312]
-        arch: [x64_64, AArch64]
+        arch: [x86_64, AArch64]
 
     runs-on: ${{ matrix.arch == 'AArch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           if-no-files-found: error
-          name: snapshot-${{ matrix.package }}-${{ matrix.py_version }}-${{ env.tm_package_version }}
+          name: snapshot-${{ matrix.package }}-${{ matrix.arch }}-${{ matrix.py_version }}-${{ env.tm_package_version }}
           path: dist
 
       - name: Release python wheels
