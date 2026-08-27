@@ -95,3 +95,84 @@ jobs:
           replacesArtifacts: true
           makeLatest: true
           artifactErrorsFailBuild: true
+
+  build_macos:
+    name: macOS Build
+    permissions:
+      contents: write
+    if: ${{ github.repository_owner == 'llvm' || github.event_name != 'schedule' }}
+    strategy:
+      matrix:
+        package: [torch-mlir]
+        py_version: ['3.10', '3.11', '3.12']
+        include:
+          - py_version: '3.10'
+            py_tag: 'cp310-cp310'
+          - py_version: '3.11'
+            py_tag: 'cp311-cp311'
+          - py_version: '3.12'
+            py_tag: 'cp312-cp312'
+
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout torch-mlir
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: llvm/torch-mlir
+          ref: refs/heads/main
+          submodules: 'true'
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-build
+        with:
+          python-version: ${{ matrix.py_version }}
+
+      - name: Verify python version
+        run: |
+          actual_version=$(python --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+          expected_version="${{ matrix.py_version }}"
+
+          if [ "$actual_version" != "$expected_version" ]; then
+            echo "ERROR: Python version mismatch! Expected $expected_version but got $actual_version"
+            exit 1
+          fi
+          echo "Python version verified: Expected $expected_version and got $actual_version"
+
+      - name: Build Python wheels
+        run: |
+          cd $GITHUB_WORKSPACE
+          tm_package_version="$(date '+%Y%m%d').${{ github.run_number }}"
+          echo "tm_package_version=${tm_package_version}" >> $GITHUB_ENV
+          printf "TORCH_MLIR_PYTHON_PACKAGE_VERSION=%s\n" ${tm_package_version} > ./torch_mlir_package_version
+          python -m pip install -U pip delocate
+          mkdir -p dist
+          _PYTHON_HOST_PLATFORM=macosx-12.0-arm64 \
+          CMAKE_GENERATOR=Ninja \
+          TORCH_MLIR_PYTHON_PACKAGE_VERSION=${tm_package_version} \
+          MACOSX_DEPLOYMENT_TARGET=12.0 \
+          CMAKE_OSX_ARCHITECTURES=arm64 \
+          ARCHFLAGS="-arch arm64" \
+          python -m pip wheel -v --no-build-isolation -w dist .
+          delocate-wheel -v dist/torch_mlir*.whl
+
+      - name: Upload python wheels
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          if-no-files-found: error
+          name: snapshot-${{ matrix.package }}-macos-arm64-${{ matrix.py_tag }}-${{ env.tm_package_version }}
+          path: dist
+
+      - name: Release python wheels
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v.1.21.0
+        with:
+          artifacts: dist/*.whl
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "dev-wheels"
+          name: "dev-wheels"
+          body: "Automatic snapshot release of torch-mlir python wheels."
+          removeArtifacts: false
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+          artifactErrorsFailBuild: true
